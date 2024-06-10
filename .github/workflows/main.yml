@@ -1,5 +1,4 @@
-
-name: Node.js CI/CD
+name: Deploy to DigitalOcean
 
 on:
   push:
@@ -7,56 +6,32 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [14.x]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: List files for debugging
-        run: ls -al
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run tests
-        run: npm test
-
   deploy:
-    needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Cancel Previous Runs
+      uses: styfle/cancel-workflow-action@0.11.0
+      with:
+        access_token: ${{ secrets.PAT_TOKEN }}
 
-      - name: List files for debugging
-        run: ls -al
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14.x'
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
 
-      - name: Install dependencies
-        run: npm install
+    - name: Add DigitalOcean server to known_hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan 64.227.65.168 >> ~/.ssh/known_hosts
 
-      - name: Build the project
-        run: npm run build
+    - name: Copy files to DigitalOcean
+      run: |
+        rsync -avz --delete ./ root@64.227.65.168:/github/ogy-sso-fe/
 
-      - name: Deploy to Heroku
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: |
-          git remote add heroku https://git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git
-          git push heroku main
+    - name: Execute deployment script
+      run: |
+        sshpass -p "Ty7#\$zAv" ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
