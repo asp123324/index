@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Node.js CI/CD
 
 on:
   push:
@@ -6,34 +6,50 @@ on:
       - main
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x]
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16' 
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Build and Deploy
-      run: |
-        mkdir deploy
-        cp index.html deploy/index.html
+      - name: Install dependencies
+        run: npm install
 
-    - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@4.1.2
-      with:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        BRANCH: gh-pages
-        FOLDER: deploy
-        CLEAN: true
-        SINGLE_COMMIT: true
+      - name: Run tests
+        run: npm test
 
-    - name: Debug - Check Git version
-      run: git --version
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
 
-    - name: Debug - Show Git config
-      run: git config --list
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the project
+        run: npm run build
+
+      - name: Deploy to Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          git remote add heroku https://git.heroku.com/${{ secrets.HEROKU_APP_NAME }}.git
+          git push heroku main
