@@ -16,15 +16,12 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '20' 
+        node-version: '16' 
 
     - name: Build and Deploy
       run: |
         mkdir deploy
         cp index.html deploy/index.html
-
-    - name: Debug - List files
-      run: ls -la deploy
 
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@4.1.2
@@ -32,6 +29,8 @@ jobs:
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         BRANCH: gh-pages
         FOLDER: deploy
+        CLEAN: true
+        SINGLE_COMMIT: true
 
     - name: Debug - Check Git version
       run: git --version
