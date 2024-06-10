@@ -22,7 +22,9 @@ jobs:
       run: |
         mkdir deploy
         cp index.html deploy/index.html
-      
+
+    - name: Debug - List files
+      run: ls -la deploy
 
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@4.1.2
@@ -30,3 +32,9 @@ jobs:
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         BRANCH: gh-pages
         FOLDER: deploy
+
+    - name: Debug - Check Git version
+      run: git --version
+
+    - name: Debug - Show Git config
+      run: git config --list
