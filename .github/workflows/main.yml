@@ -17,6 +17,8 @@ jobs:
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
+        
+  
 
     - name: Add DigitalOcean server to known_hosts
       run: |
