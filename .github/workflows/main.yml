@@ -30,8 +30,10 @@ jobs:
 
     - name: Copy files to DigitalOcean
       run: |
-        rsync -avz --delete ./ root@64.227.65.168:/github/ogy-sso-fe/
+        rsync -avz --delete ./ root@64.227.65.168:/var/www/html/
 
     - name: Execute deployment script
+      env:
+        SSHPASS: ${{ secrets.DIGITALOCEAN_PASSWORD }}
       run: |
-        sshpass -p "Ty7#$zAvsm#$c" ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
+        sshpass -e ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
