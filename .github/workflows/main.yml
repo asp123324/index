@@ -13,10 +13,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # - name: Set up SSH
-    #   uses: webfactory/ssh-agent@v0.5.3
-    #   with:
-    #     ssh-private-key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+         ssh-private-key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
         
   
 
@@ -31,6 +31,6 @@ jobs:
 
     - name: Execute deployment script
       env:
-        SSHPASS: ${{ secrets.DIGITALOCEAN_PASSWORD }}
+        SSHPASS: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
       run: |
         sshpass -e ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
