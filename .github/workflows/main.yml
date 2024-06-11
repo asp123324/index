@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Cancel Previous Runs
+      uses: styfle/cancel-workflow-action@0.11.0
+      with:
+        access_token: ${{ secrets.PAT_TOKEN }}
+
     - name: Checkout code
       uses: actions/checkout@v2
 
@@ -26,9 +31,6 @@ jobs:
     - name: Copy files to DigitalOcean
       run: |
         rsync -avz --delete ./ root@64.227.65.168:/var/www/html/
-
-    - name: Install sshpass
-      run: sudo apt-get install sshpass
 
     - name: Execute deployment script
       env:
