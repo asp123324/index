@@ -33,4 +33,5 @@ jobs:
       env:
         SSHPASS: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
       run: |
+       sshpass -e ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
         sshpass -e ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
