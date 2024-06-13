@@ -27,10 +27,10 @@ jobs:
     - name: Deploy based on branch
       run: |
         if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-          rsync -avz --delete ./ root@64.227.65.168:/var/www/learning.moonhive-server.in.net/
+          rsync -avz --delete ./ root@64.227.65.168:/var/www/html/main/
           sshpass -e ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
         elif [ "${{ github.ref }}" == "refs/heads/branch1" ]; then
-          rsync -avz --delete ./ root@64.227.65.168:/var/www/learning2.moonhive-server.in.net/
+          rsync -avz --delete ./ root@64.227.65.168:/var/www/html/branch1/
           sshpass -e ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
         else
           echo "This action runs only on 'main' or 'branch1' branches."
