@@ -18,36 +18,30 @@ jobs:
       uses: webfactory/ssh-agent@v0.5.3
       with:
          ssh-private-key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
+        
+  
 
     - name: Add DigitalOcean server to known_hosts
       run: |
         mkdir -p ~/.ssh
         ssh-keyscan 64.227.65.168 >> ~/.ssh/known_hosts
 
+    - name: Copy files to DigitalOcean
+      run: |
+        rsync -avz --delete ./ root@64.227.65.168:/var/www/html/
+        
     - name: Deploy based on branch
       run: |
         if [ "${{ github.ref }}" == "refs/heads/main" ]; then
           rsync -avz --delete ./ root@64.227.65.168:/var/www/html/main/
-          sshpass -e ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
         elif [ "${{ github.ref }}" == "refs/heads/branch1" ]; then
           rsync -avz --delete ./ root@64.227.65.168:/var/www/html/branch1/
-          sshpass -e ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
         else
           echo "This action runs only on 'main' or 'branch1' branches."
         fi
-      env:
-        SSHPASS: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
 
-    - name: Execute deployment script for main
-      if: github.ref == 'refs/heads/main'
-      run: |
-        sshpass -e ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
+    - name: Execute deployment script
       env:
         SSHPASS: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
-
-    - name: Execute deployment script for branch1
-      if: github.ref == 'refs/heads/branch1'
       run: |
-        sshpass -e ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
-      env:
-        SSHPASS: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
+       sshpass -e ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
