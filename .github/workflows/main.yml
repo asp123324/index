@@ -58,7 +58,7 @@ jobs:
 
     - name: Copy files to DigitalOcean
       run: |
-        rsync -avz --delete ./ root@64.227.65.168:/var/www/html/
+        rsync -avz --delete ./ root@64.227.65.168:/var/www/learning2.moonhive-server.in.net/html/
         
    
 
