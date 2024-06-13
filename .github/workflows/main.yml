@@ -7,7 +7,37 @@ on:
       - branch1
 
 jobs:
-  deploy:
+  deploy-prod:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+         ssh-private-key: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
+
+    - name: Add DigitalOcean server to known_hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan 64.227.65.168 >> ~/.ssh/known_hosts
+
+    - name: Copy files to DigitalOcean
+      run: |
+        rsync -avz --delete ./ root@64.227.65.168:/var/www/html/
+        
+    
+    - name: Execute deployment script
+      env:
+        SSHPASS: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
+      run: |
+       sshpass -e ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
+
+  deploy-dev:
+    if: github.ref == 'refs/heads/branch1'
     runs-on: ubuntu-latest
 
     steps:
@@ -30,18 +60,10 @@ jobs:
       run: |
         rsync -avz --delete ./ root@64.227.65.168:/var/www/html/
         
-    - name: Deploy based on branch
-      run: |
-        if [ "${{ github.ref }}" == "refs/heads/main" ]; then
-          rsync -avz --delete ./ root@64.227.65.168:/var/www/html/main/
-        elif [ "${{ github.ref }}" == "refs/heads/branch1" ]; then
-          rsync -avz --delete ./ root@64.227.65.168:/var/www/html/branch1/
-        else
-          echo "This action runs only on 'main' or 'branch1' branches."
-        fi
+   
 
     - name: Execute deployment script
       env:
         SSHPASS: ${{ secrets.DIGITALOCEAN_SSH_KEY }}
       run: |
-       sshpass -e ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
+        sshpass -e ssh root@64.227.65.168 'bash -s' < ./install-n-deploy.sh
